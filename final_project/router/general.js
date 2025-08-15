@@ -14,7 +14,6 @@ public_users.post("/register", (req,res) => {
 public_users.get('/',function (req, res) {
   //Write your code here
     res.send(JSON.stringify({books}, null, 4));
-  //return res.status(300).json({message: "Yet to be implemented"});
 });
 
 // Get book details based on ISBN
@@ -24,9 +23,9 @@ public_users.get('/isbn/:isbn',function (req, res) {
     const filtered_books = booksArray.filter(book => book.isbn === isbn);
 
     if (filtered_books.length > 0) {
-        res.status(200).json({ books: filtered_books });
+       res.send(JSON.stringify({filtered_books}, null, 4));
     } else {
-        res.status(404).json({ message: "No books found for this isbn." });
+        res.send("No books found for this isbn.");
     }
  });
   
@@ -39,7 +38,7 @@ public_users.get('/author/:author',function (req, res) {
     if (filtered_books.length > 0) {
         res.send(JSON.stringify({filtered_books}, null, 4));
     } else {
-        res.status(404).json({ message: "No books found for this author." });
+        res.send("No books found for this author.");
     }
 });
 
@@ -52,14 +51,22 @@ public_users.get('/title/:title',function (req, res) {
     if (filtered_books.length > 0) {
         res.send(JSON.stringify({filtered_books}, null, 4));
     } else {
-        res.status(404).json({ message: "No books found for this title." });
+        res.send("No books found for this title.");
     }
 });
 
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+    let booksArray = Object.values(books);
+    const isbn = req.params.isbn;
+    const filtered_books = booksArray.filter(book => book.isbn === isbn);
+
+    if (filtered_books.length > 0) {
+        const review = filtered_books[0].reviews
+        res.send(JSON.stringify({review}, null, 4));
+    } else {
+        res.send("No books found for this isbn.");
+    }
 });
 
 module.exports.general = public_users;
