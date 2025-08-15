@@ -5,25 +5,22 @@ const regd_users = express.Router();
 
 let users = [
     {"username":"user1","password":"password1"},
-       {"username":"user2","password":"password2"},
-          {"username":"user2","password":"password3"}
+    {"username":"user2","password":"password2"},
+    {"username":"user3","password":"password3"} 
 ];
 
 const isValid = (username)=>{ //returns boolean
-//write code to check is the username is valid
+    // Find a user with the matching username
+    const user = users.find(u => u.username === username);
+    // Return true if the username is found, false otherwise
+    return !!user;
 }
 
 const authenticatedUser = (username,password)=>{ //returns boolean
-   // Filter the users array for any user with the same username and password
-   let validusers = users.filter((user) => {
-    return (user.username === username && user.password === password);
-});
-// Return true if any valid user is found, otherwise false
-if (validusers.length > 0) {
-    return true;
-} else {
-    return false;
-}
+    // Find a user with the matching username and password
+    const user = users.find(u => u.username === username && u.password === password);
+    // Return true if a user is found, false otherwise
+    return !!user;
 }
 
 //only registered users can login
@@ -50,10 +47,57 @@ regd_users.post("/login", (req,res) => {
     }
 });
 
-// Add a book review
+// Add or modify a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+    const isbn = req.params.isbn;
+    const review = req.query.review;
+    // Get the username from the session after authentication
+    const username = req.session.authorization.username;
+
+    if (!review) {
+        return res.status(400).json({ message: "Review is missing in the query." });
+    }
+    
+    // Find the book by its ISBN
+    const bookToUpdate = Object.values(books).find(book => book.isbn === isbn);
+
+    if (!bookToUpdate) {
+        return res.status(404).json({ message: "Book not found for the given ISBN." });
+    }
+    
+    // Check if the user has already reviewed the book
+    if (bookToUpdate.reviews[username]) {
+        // Update the existing review
+        bookToUpdate.reviews[username] = review;
+        return res.status(200).json({ message: `Review for ISBN ${isbn} updated.` });
+    } else {
+        // Add a new review
+        bookToUpdate.reviews[username] = review;
+        return res.status(201).json({ message: `Review for ISBN ${isbn} added successfully.` });
+    }
+});
+
+// Delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const isbn = req.params.isbn;
+    // Get the username from the session after authentication
+    const username = req.session.authorization.username;
+
+    // Find the book by its ISBN
+    const bookToDelete = Object.values(books).find(book => book.isbn === isbn);
+
+    if (!bookToDelete) {
+        return res.status(404).json({ message: "Book not found for the given ISBN." });
+    }
+    
+    // Check if the user has a review for the book
+    if (bookToDelete.reviews[username]) {
+        // Delete the review from the book's reviews object
+        delete bookToDelete.reviews[username];
+        return res.status(200).json({ message: `Review for ISBN ${isbn} by ${username} deleted.` });
+    } else {
+        return res.status(404).json({ message: `No review found for ISBN ${isbn} from user ${username}` });
+    }
 });
 
 module.exports.authenticated = regd_users;
