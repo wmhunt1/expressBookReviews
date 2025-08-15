@@ -6,8 +6,33 @@ const public_users = express.Router();
 
 
 public_users.post("/register", (req,res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+    const username = req.body.username;
+    const password = req.body.password;
+    // Check if both username and password are provided
+    if (username && password) {
+        // Check if the user does not already exist
+        const doesExist = (username) => {
+    // Filter the users array for any user with the same username
+    let userswithsamename = users.filter((user) => {
+        return user.username === username;
+    });
+    // Return true if any user with the same username is found, otherwise false
+    if (userswithsamename.length > 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+        if (!doesExist(username)) {
+            // Add the new user to the users array
+            users.push({"username": username, "password": password});
+            return res.status(200).json({message: "User successfully registered. Now you can login"});
+        } else {
+            return res.status(404).json({message: "User already exists!"});
+        }
+    }
+    // Return error if username or password is missing
+    return res.status(404).json({message: "Unable to register user."});
 });
 
 // Get the book list available in the shop
@@ -23,9 +48,9 @@ public_users.get('/isbn/:isbn',function (req, res) {
     const filtered_books = booksArray.filter(book => book.isbn === isbn);
 
     if (filtered_books.length > 0) {
-       res.send(JSON.stringify({filtered_books}, null, 4));
+       return res.status(200).json({message: filtered_books});
     } else {
-        res.send("No books found for this isbn.");
+        return res.status(404).json({message: "No books found for ISBN"});
     }
  });
   
@@ -36,9 +61,9 @@ public_users.get('/author/:author',function (req, res) {
     const filtered_books = booksArray.filter(book => book.author === author);
 
     if (filtered_books.length > 0) {
-        res.send(JSON.stringify({filtered_books}, null, 4));
+        return res.status(200).json({message: filtered_books});
     } else {
-        res.send("No books found for this author.");
+        return res.status(404).json({message: "No books found for Author"});
     }
 });
 
@@ -49,9 +74,9 @@ public_users.get('/title/:title',function (req, res) {
     const filtered_books = booksArray.filter(book => book.title === title);
 
     if (filtered_books.length > 0) {
-        res.send(JSON.stringify({filtered_books}, null, 4));
+        return res.status(200).json({message: filtered_books});
     } else {
-        res.send("No books found for this title.");
+        return res.status(404).json({message: "No books found for Title"});
     }
 });
 
@@ -63,9 +88,9 @@ public_users.get('/review/:isbn',function (req, res) {
 
     if (filtered_books.length > 0) {
         const review = filtered_books[0].reviews
-        res.send(JSON.stringify({review}, null, 4));
+        return res.status(200).json({message: review});
     } else {
-        res.send("No books found for this isbn.");
+        return res.status(404).json({message: "No reviews for ISBN"});
     }
 });
 
